@@ -48,7 +48,7 @@ pip packages**. Choose your platform below.
 If you received a `.zip`, extract it. Otherwise clone the repository:
 
 ```bash
-git clone https://github.com/r4tnadeepbose/APKRecon.git APK-Recon
+git clone https://github.com/r4tnadeepbose/APK-Recon.git APK-Recon
 cd APK-Recon
 ```
 
@@ -105,7 +105,7 @@ To update a cloned copy later: `cd APK-Recon && git pull`.
 3. **Get the app and install androguard in a venv** (recommended):
    ```bash
    mkdir -p ~/tools && cd ~/tools
-   git clone https://github.com/r4tnadeepbose/APKRecon.git APK-Recon
+   git clone https://github.com/r4tnadeepbose/APK-Recon.git APK-Recon
    cd APK-Recon
    python3 -m venv .venv
    source .venv/bin/activate
