@@ -243,6 +243,10 @@ APKTOOL_CANDIDATES = [
 JADX_CANDIDATES = [
     r"C:\jadx\bin\jadx.bat",
     r"C:\jadx\bin\jadx",
+    r"C:\Program Files\jadx\bin\jadx.bat",
+    os.path.expandvars(r"%LOCALAPPDATA%\Programs\jadx\bin\jadx.bat"),
+    os.path.expandvars(r"%USERPROFILE%\scoop\apps\jadx\current\bin\jadx.bat"),
+    r"C:\ProgramData\chocolatey\bin\jadx.exe",
     "jadx",
 ]
 

@@ -10,7 +10,7 @@ from ..androguard_support import HAS_ANDROGUARD
 from ..config import (
     APKTOOL_CANDIDATES, JADX_CANDIDATES, PALETTE, REFERENCE_LINKS, SIGNAL_MARKERS,
 )
-from ..scanner import find_tool
+from ..scanner import find_jadx, find_tool
 
 
 class TextViewsMixin:
@@ -77,9 +77,8 @@ class TextViewsMixin:
         else:
             items.append(("androguard: not installed (pip install androguard)", "kv", None))
 
-        jadx_override = self.tool_paths.get("jadx_path")
+        jadx = find_jadx(self.tool_paths.get("jadx_path"))
         apktool_override = self.tool_paths.get("apktool_path")
-        jadx = find_tool(([jadx_override] if jadx_override else []) + JADX_CANDIDATES)
         apktool = find_tool(([apktool_override] if apktool_override else []) + APKTOOL_CANDIDATES)
         items.append((f"jadx: {jadx[1]}" if jadx[1] else "jadx: not found", "kv", None))
         items.append((f"apktool: {apktool[1]}" if apktool[1] else "apktool: not found", "kv", None))

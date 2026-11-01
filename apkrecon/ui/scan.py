@@ -13,7 +13,9 @@ from ..config import (
     APKTOOL_CANDIDATES, DECOMPILE_DIR, ENGINE_MARKER, JADX_CANDIDATES, PALETTE,
     SCAN_EXTS,
 )
-from ..scanner import ScanResult, collect_apk_inventory, find_tool, scan_text
+from ..scanner import (
+    ScanResult, collect_apk_inventory, find_jadx, find_tool, scan_text,
+)
 
 
 class ScanMixin:
@@ -62,7 +64,7 @@ class ScanMixin:
             if engine == "auto":
                 if HAS_ANDROGUARD:
                     engine = "dex-only"
-                elif find_tool(JADX_CANDIDATES)[0]:
+                elif find_jadx()[0]:
                     engine = "jadx"
                 else:
                     engine = "apktool"
@@ -426,11 +428,12 @@ class ScanMixin:
         os.makedirs(self.decompile_dir, exist_ok=True)
 
         if engine == "jadx":
-            candidates = (([self.tool_paths["jadx_path"]]
-                           if self.tool_paths.get("jadx_path") else []) + JADX_CANDIDATES)
-            prefix, label = find_tool(candidates)
+            prefix, label = find_jadx(self.tool_paths.get("jadx_path"))
             if not prefix:
-                self._error("jadx not found", "Install jadx or switch engine.")
+                self._error(
+                    "jadx not found",
+                    "Install jadx (CLI or jadx-gui-with-JRE) or switch engine.",
+                )
                 return False
             cmd = prefix + ["-d", self.decompile_dir]
             if self.fast_mode_var.get():

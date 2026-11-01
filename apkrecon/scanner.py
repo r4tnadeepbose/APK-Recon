@@ -1,12 +1,13 @@
 """Scanning primitives: extraction passes, archive inventory and helpers."""
 
+import glob
 import math
 import os
 import shutil
 import zipfile
 from urllib.parse import parse_qsl, urlsplit
 
-from .config import ENTROPY_THRESHOLD
+from .config import ENTROPY_THRESHOLD, JADX_CANDIDATES
 from .regexes import (
     CRYPTO_LOOKUP, CRYPTO_RE, DOMAIN_RE, EMAIL_RE, ENTROPY_RE, EXT_RE,
     IPV4_RE, IPV6_RE, SECRET_PATTERNS, SDK_LOOKUP, SDK_RE, SIGNAL_LOOKUP,
@@ -28,6 +29,54 @@ def shannon_entropy(token):
 
 
 # ===========================================================================
+
+def find_jadx(explicit=None):
+    """Locate the jadx CLI, including bundled jadx-gui-with-JRE packages."""
+    if explicit:
+        prefix, label = find_tool([explicit])
+        if prefix:
+            return prefix, label
+    prefix, label = find_tool(JADX_CANDIDATES)
+    if prefix:
+        return prefix, label
+
+    home = os.path.expanduser("~")
+    bundled_patterns = (
+        os.path.join(home, "Downloads", "jadx-gui-*-with-jre-win"),
+        os.path.join(home, "Downloads", "jadx-gui-*"),
+        os.path.join(home, "jadx-gui-*-with-jre-win"),
+        os.path.join("C:\\", "jadx-gui-*-with-jre-win"),
+    )
+    seen = set()
+    for pattern in bundled_patterns:
+        for folder in sorted(glob.glob(pattern), reverse=True):
+            if folder in seen:
+                continue
+            seen.add(folder)
+            for java_name in ("java.exe", "java"):
+                java = os.path.join(folder, "jre", "bin", java_name)
+                if not os.path.isfile(java):
+                    continue
+                jars = sorted(glob.glob(os.path.join(folder, "lib", "jadx-*all.jar")))
+                if jars:
+                    return (
+                        [java, "-cp", jars[-1], "jadx.cli.JadxCLI"],
+                        "jadx (bundled jre)",
+                    )
+
+    cli_patterns = (
+        os.path.join(home, "Downloads", "jadx-*", "bin", "jadx.bat"),
+        os.path.join(home, "Downloads", "jadx-*", "bin", "jadx"),
+        os.path.join(home, "jadx-*", "bin", "jadx.bat"),
+        os.path.join(home, "jadx-*", "bin", "jadx"),
+    )
+    for pattern in cli_patterns:
+        for candidate in sorted(glob.glob(pattern), reverse=True):
+            prefix, label = find_tool([candidate])
+            if prefix:
+                return prefix, label
+    return None, None
+
 
 def find_tool(candidates):
     for c in candidates:

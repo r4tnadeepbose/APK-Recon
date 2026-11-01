@@ -8,7 +8,7 @@ from ..androguard_support import HAS_ANDROGUARD
 from ..config import (
     APKTOOL_CANDIDATES, JADX_CANDIDATES, PALETTE,
 )
-from ..scanner import find_tool
+from ..scanner import find_jadx, find_tool
 
 
 class DialogsMixin:
@@ -134,10 +134,7 @@ class DialogsMixin:
 
     # ---------------- Scan setup (engine chooser) ----------------
     def _engine_snapshot(self):
-        jadx_prefix, jadx_label = find_tool(
-            ([self.tool_paths["jadx_path"]] if self.tool_paths.get("jadx_path") else [])
-            + JADX_CANDIDATES
-        )
+        jadx_prefix, jadx_label = find_jadx(self.tool_paths.get("jadx_path"))
         apktool_prefix, apktool_label = find_tool(
             ([self.tool_paths["apktool_path"]] if self.tool_paths.get("apktool_path") else [])
             + APKTOOL_CANDIDATES
