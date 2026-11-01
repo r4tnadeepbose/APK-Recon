@@ -1,6 +1,6 @@
 # APK-Recon
 
-**Offline, god-tier APK recon.** Point it at an Android package and get endpoints, deep links,
+**Offline APK reconnaissance.** Point it at an Android package and get endpoints, deep links,
 hardcoded secrets, SDKs, APK inventory, signing posture, a MASVS report, and an evidence-backed
 risk score — all in a neutral, terminal-flavoured desktop UI. Everything runs locally; nothing
 leaves the machine.
