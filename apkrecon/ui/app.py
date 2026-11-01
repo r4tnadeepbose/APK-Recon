@@ -9,7 +9,7 @@ import tkinter.font as tkfont
 from tkinter import filedialog, messagebox, ttk
 
 from ..config import (
-    DECOMPILE_DIR, HISTORY_PATH, PALETTE, SETTINGS_PATH,
+    DECOMPILE_DIR, HISTORY_PATH, PALETTE, SETTINGS_PATH, apply_theme,
 )
 from ..scanner import ScanResult
 from .dashboard import DashboardMixin
@@ -131,6 +131,9 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
         self.workers_var   = tk.IntVar(value=min(16, (os.cpu_count() or 4) * 2))
         self.tool_paths = {}
         self.last_dir = ""
+        self.theme_name = "dark"
+        self._state_label = None
+        self._state_color = None
         self._load_settings()
 
         self.running = False
@@ -145,6 +148,7 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
         self.risk_grade = "—"
         self.diff_summary = None
         self.log_lines = 0
+        self._log_entries = []
         self.last_report_path = None
         self.last_engine = None
         self.last_duration = 0.0
@@ -190,6 +194,10 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
             self.deep_var.set(data["deep_scan"])
         if isinstance(data.get("ask_before_scan"), bool):
             self.ask_scan_var.set(data["ask_before_scan"])
+        theme = data.get("theme")
+        if theme in ("dark", "light"):
+            apply_theme(theme)
+            self.theme_name = theme
         workers = data.get("workers")
         if isinstance(workers, int) and 1 <= workers <= 64:
             self.workers_var.set(workers)
@@ -209,6 +217,7 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
                 "auto_html": self.auto_html_var.get(),
                 "deep_scan": self.deep_var.get(),
                 "ask_before_scan": self.ask_scan_var.get(),
+                "theme": self.theme_name,
                 "workers": self.workers_var.get(),
                 "jadx_path": self.tool_paths.get("jadx_path", ""),
                 "apktool_path": self.tool_paths.get("apktool_path", ""),
@@ -286,6 +295,50 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
         self._refresh_history_views()
         self._status("Scan history cleared.")
         self._log("scan history cleared", "review")
+
+    # ---------------- Theme ----------------
+    def toggle_theme(self):
+        if self.running:
+            self._status("Finish or cancel the scan before switching theme.")
+            return
+        self.theme_name = "light" if self.theme_name == "dark" else "dark"
+        apply_theme(self.theme_name)
+        self._save_settings()
+        self._rebuild_ui()
+
+    def _rebuild_ui(self):
+        status_text = self.status_var.get() if hasattr(self, "status_var") else "Ready."
+        window_title = self.root.title()
+        for child in list(self.root.winfo_children()):
+            child.destroy()
+        self.text_widgets.clear()
+        self.nav_rows.clear()
+        self.kpi_values.clear()
+        self.pages.clear()
+        self.log_lines = 0
+        self._dash_job = None
+        self._anim_job = None
+        self.root.configure(bg=PALETTE["bg"])
+        self._build_ui()
+        log_widget = self.text_widgets.get("log")
+        if log_widget is not None and self._log_entries:
+            for stamp, message, tag in self._log_entries[-150:]:
+                log_widget.insert(tk.END, f"{stamp}  ", "muted")
+                log_widget.insert(tk.END, message + "\n", tag)
+            self.log_lines = min(150, len(self._log_entries))
+        self._render()
+        target_tab = self.active_tab if self.active_tab in self.pages else "dashboard"
+        self._switch_tab(target_tab)
+        self.root.title(window_title)
+        self.status_var.set(status_text or "Ready.")
+        if self._state_label:
+            self._set_state(self._state_label, self._state_color)
+        if not self.running and all(
+            status in ("done", "skip") for status in self.phase_status.values()
+        ):
+            self.progress.config(maximum=1, value=1)
+        self._sync_buttons()
+        self._log(f"theme switched to {self.theme_name}", "accent")
 
     # ---------------- Build ----------------
     def _build_ui(self):
@@ -404,6 +457,11 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
         self._button(header, "?", self.open_help).pack(
             side="right", padx=(0, 8), pady=4,
         )
+        self._button(
+            header,
+            "LIGHT" if self.theme_name == "dark" else "DARK",
+            self.toggle_theme,
+        ).pack(side="right", padx=(0, 8), pady=4)
         tk.Label(
             header, text="LOCAL · OFFLINE", bg=PALETTE["bg"],
             fg=PALETTE["muted"], font=self.f_xs,
@@ -556,7 +614,8 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
             picker, text="❯", bg=PALETTE["surface"], fg=PALETTE["accent"],
             font=self.f_bold_md,
         ).pack(side="left", padx=(0, 8))
-        self.path_var = tk.StringVar()
+        if not hasattr(self, "path_var"):
+            self.path_var = tk.StringVar()
         self.path_entry = self._entry(picker, self.path_var)
         self.path_entry.pack(side="left", fill="x", expand=True, ipady=6)
         self.btn_browse = self._button(picker, "BROWSE", self.browse_apk, danger=True)
@@ -793,6 +852,7 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
         self.root.bind("<Control-l>", lambda _e: self.clear_filter())
         self.root.bind("<Control-d>", lambda _e: self._switch_tab("dashboard"))
         self.root.bind("<Control-h>", lambda _e: self.open_html_report())
+        self.root.bind("<Control-t>", lambda _e: self.toggle_theme())
         self.root.bind("<F1>", lambda _e: self.open_help())
 
     def _focus_filter(self):
@@ -801,6 +861,8 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
 
     # ---------------- State / navigation ----------------
     def _set_state(self, text, color):
+        self._state_label = text
+        self._state_color = color
         self.state_pill.configure(text=f"● {text}", fg=color)
 
     def _sync_buttons(self):
@@ -980,6 +1042,8 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
         def do():
             widget.insert(tk.END, f"{stamp}  ", "muted")
             widget.insert(tk.END, message + "\n", tag)
+            self._log_entries.append((stamp, message, tag))
+            del self._log_entries[:-500]
             self.log_lines += 1
             if self.log_lines > 1500:
                 widget.delete("1.0", "300.0")

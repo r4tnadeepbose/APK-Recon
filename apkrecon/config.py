@@ -18,7 +18,7 @@ ENGINE_MARKER = ".apkrecon-engine"
 # Theme
 # ---------------------------------------------------------------------------
 
-PALETTE = {
+DARK = {
     "bg":           "#0a0b0a",
     "surface":      "#111312",
     "surface_alt":  "#171a18",
@@ -30,6 +30,7 @@ PALETTE = {
     "text_bright":  "#eef2ec",
     "muted":        "#767d77",
     "accent":       "#54e08a",
+    "accent_active": "#63f29b",
     "accent_dim":   "#1c4a32",
     "accent_soft":  "#2f8a5c",
     "on_accent":    "#04170d",
@@ -48,9 +49,40 @@ PALETTE = {
     "ok":           "#54e08a",
 }
 
-# ---------------------------------------------------------------------------
-# Severity model
-# ---------------------------------------------------------------------------
+LIGHT = {
+    "bg":           "#f2f4f1",
+    "surface":      "#ffffff",
+    "surface_alt":  "#f0f2ef",
+    "active":       "#e3f2e9",
+    "input":        "#fafbf9",
+    "border":       "#d7dbd4",
+    "border_soft":  "#e7eae4",
+    "text":         "#3a403a",
+    "text_bright":  "#121612",
+    "muted":        "#6d756d",
+    "accent":       "#1b8a50",
+    "accent_active": "#146e40",
+    "accent_dim":   "#c5e9d6",
+    "accent_soft":  "#2f8a5c",
+    "on_accent":    "#ffffff",
+    "amber":        "#96620f",
+    "red":          "#c0393f",
+    "danger":       "#c92f36",
+    "danger_active": "#ef8a8f",
+    "danger_dim":   "#f7dcdd",
+    "on_danger":    "#ffffff",
+    "on_danger_active": "#3a0a0c",
+    "evidence":     "#5f675f",
+    "critical":     "#b8232b",
+    "high":         "#96620f",
+    "medium":       "#7a6a12",
+    "low":          "#5f6a60",
+    "ok":           "#1b8a50",
+}
+
+THEMES = {"dark": DARK, "light": LIGHT}
+PALETTE = dict(DARK)
+
 
 SEVERITY_ORDER = ("CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO")
 
@@ -65,6 +97,20 @@ SEVERITY_COLORS = {
 SEVERITY_WEIGHT = {
     "CRITICAL": 28, "HIGH": 14, "MEDIUM": 6, "LOW": 2, "INFO": 0,
 }
+
+
+def apply_theme(name):
+    """Switch the shared palette in place so every import sees the change."""
+    palette = THEMES.get(name, DARK)
+    PALETTE.clear()
+    PALETTE.update(palette)
+    SEVERITY_COLORS.update({
+        "CRITICAL": PALETTE["critical"],
+        "HIGH": PALETTE["high"],
+        "MEDIUM": PALETTE["medium"],
+        "LOW": PALETTE["low"],
+        "INFO": PALETTE["muted"],
+    })
 
 SECRET_SEVERITY = {
     "AWS Access Key": "CRITICAL",

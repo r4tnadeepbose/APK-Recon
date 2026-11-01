@@ -410,7 +410,7 @@ class DialogsMixin:
             ("Ctrl+F", "focus filter"), ("Ctrl+E", "export"),
             ("Ctrl+B", "compare baseline"), ("Ctrl+D", "dashboard"),
             ("Ctrl+H", "html report"), ("Ctrl+L", "clear filter"),
-            ("F1", "this guide"),
+            ("Ctrl+T", "light / dark theme"), ("F1", "this guide"),
         )
         grid = tk.Frame(inner, bg=PALETTE["surface"])
         grid.pack(fill="x")

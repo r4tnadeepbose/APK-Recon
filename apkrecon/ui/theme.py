@@ -9,7 +9,7 @@ class ThemeMixin:
     def _button(self, parent, text, command, primary=False, danger=False):
         if primary:
             bg, fg = PALETTE["accent"], PALETTE["on_accent"]
-            abg, afg = "#63f29b", PALETTE["on_accent"]
+            abg, afg = PALETTE["accent_active"], PALETTE["on_accent"]
             font = self.f_bold_md
         elif danger:
             bg, fg = PALETTE["danger"], PALETTE["on_danger"]
