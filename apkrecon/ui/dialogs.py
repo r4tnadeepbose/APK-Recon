@@ -180,7 +180,12 @@ class DialogsMixin:
             inner,
             text=f"target: {os.path.basename(self.current_apk_path or '—')} · choose how to extract",
             bg=PALETTE["surface"], fg=PALETTE["muted"], font=self.f_xs,
-        ).pack(anchor="w", pady=(2, 14))
+        ).pack(anchor="w", pady=(2, 4))
+        tk.Label(
+            inner,
+            text="click anywhere on a row to select an engine",
+            bg=PALETTE["surface"], fg=PALETTE["accent_soft"], font=self.f_xs,
+        ).pack(anchor="w", pady=(0, 12))
 
         engine_var = tk.StringVar(value=current)
         descriptions = {
@@ -189,29 +194,78 @@ class DialogsMixin:
             "jadx": "decompile Java/Kotlin sources — best coverage, slower",
             "apktool": "decode smali + resources — manifest/resource focus, slower",
         }
+        rows = {}
+        check_vars = {}
+
+        def toggle_engine(engine_key, enabled):
+            if not enabled:
+                check_vars[engine_key].set(engine_var.get() == engine_key)
+                return
+            if check_vars[engine_key].get():
+                engine_var.set(engine_key)
+            elif engine_var.get() == engine_key:
+                check_vars[engine_key].set(True)
+            else:
+                engine_var.set(engine_key)
+
         for key in ("auto", "dex-only", "jadx", "apktool"):
             available, detail = snapshot[key]
-            row = tk.Frame(inner, bg=PALETTE["surface"], cursor="hand2")
+            check_vars[key] = tk.BooleanVar(value=(key == current))
+            row = tk.Frame(inner, bg=PALETTE["surface"],
+                           cursor="hand2" if available else "arrow")
             row.pack(fill="x", pady=3)
-            radio = tk.Radiobutton(
-                row, text="", variable=engine_var, value=key,
-                bg=PALETTE["surface"], activebackground=PALETTE["surface"],
+            marker = tk.Checkbutton(
+                row, text="", variable=check_vars[key],
+                bg=PALETTE["surface"], fg=PALETTE["text_bright"],
+                activebackground=PALETTE["surface"],
+                activeforeground=PALETTE["accent"],
                 selectcolor=PALETTE["input"], bd=0, highlightthickness=0,
-                cursor="hand2",
+                cursor="hand2" if available else "arrow", padx=6, pady=4,
                 state="normal" if available else "disabled",
+                command=lambda engine_key=key, enabled=available:
+                    toggle_engine(engine_key, enabled),
             )
-            radio.pack(side="left")
+            marker.pack(side="left")
             body = tk.Frame(row, bg=PALETTE["surface"])
             body.pack(side="left", fill="x", expand=True)
-            title = key if key != "auto" else "auto (recommended)"
-            tk.Label(body, text=title, bg=PALETTE["surface"], fg=PALETTE["text_bright"],
-                     font=self.f_bold, anchor="w").pack(anchor="w")
-            tk.Label(body, text=descriptions[key], bg=PALETTE["surface"],
-                     fg=PALETTE["muted"], font=self.f_xs, anchor="w").pack(anchor="w")
-            detail_color = PALETTE["accent"] if available else PALETTE["critical"]
+            title_text = key if key != "auto" else "auto (recommended)"
+            title = tk.Label(body, text=title_text, bg=PALETTE["surface"],
+                             fg=PALETTE["text_bright"], font=self.f_bold, anchor="w")
+            title.pack(anchor="w")
+            desc = tk.Label(body, text=descriptions[key], bg=PALETTE["surface"],
+                            fg=PALETTE["muted"], font=self.f_xs, anchor="w")
+            desc.pack(anchor="w")
             detail_text = detail if available else "unavailable — " + detail
-            tk.Label(row, text=detail_text, bg=PALETTE["surface"], fg=detail_color,
-                     font=self.f_xs, anchor="e").pack(side="right", padx=6)
+            detail_label = tk.Label(row, text=detail_text, bg=PALETTE["surface"],
+                                    fg=PALETTE["accent"] if available else PALETTE["critical"],
+                                    font=self.f_xs, anchor="e")
+            detail_label.pack(side="right", padx=6)
+
+            def choose(_event=None, engine_key=key, enabled=available):
+                if enabled:
+                    engine_var.set(engine_key)
+
+            for widget in (row, body, title, desc, detail_label):
+                widget.bind("<Button-1>", choose)
+            rows[key] = (row, marker, body, title, desc, detail_label, available)
+
+        def paint_engines(*_args):
+            selected = engine_var.get()
+            for engine_key, (row, marker, body, title, desc,
+                             detail_label, available) in rows.items():
+                active = engine_key == selected
+                background = PALETTE["active"] if active else PALETTE["surface"]
+                check_vars[engine_key].set(active)
+                for widget in (row, marker, body, title, desc, detail_label):
+                    widget.configure(bg=background)
+                marker.configure(activebackground=background)
+                title.configure(
+                    fg=PALETTE["accent"] if active else PALETTE["text_bright"])
+                detail_label.configure(
+                    fg=PALETTE["accent"] if available else PALETTE["critical"])
+
+        engine_var.trace_add("write", paint_engines)
+        paint_engines()
 
         options = tk.Frame(inner, bg=PALETTE["surface"])
         options.pack(fill="x", pady=(16, 0))
@@ -276,6 +330,8 @@ class DialogsMixin:
 
         self._button(buttons, "START SCAN", start, danger=True).pack(side="right")
         self._button(buttons, "CANCEL", win.destroy).pack(side="right", padx=(0, 8))
+        win.bind("<Return>", lambda _event: start())
+        win.bind("<Escape>", lambda _event: win.destroy())
 
         win.grab_set()
         self.root.wait_window(win)
