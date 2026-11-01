@@ -1,0 +1,8 @@
+# APKRecon has no required third-party dependencies (Python 3.10+ with Tk).
+#
+# Optional integrations for deeper analysis:
+#   pip install androguard
+#
+# Optional external decompilers (install separately, not pip):
+#   jadx    -> https://github.com/skylot/jadx
+#   apktool -> https://apktool.org/

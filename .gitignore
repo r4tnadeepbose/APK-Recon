@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# APKRecon runtime artefacts
+apk_recon_settings.json
+apk_recon_history.json
+decompiled_apk_temp/
+reports/
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

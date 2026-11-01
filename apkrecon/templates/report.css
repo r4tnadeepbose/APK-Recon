@@ -1,0 +1,39 @@
+:root{--bg:#0a0b0a;--panel:#111312;--panel2:#171a18;--line:#242824;
+--text:#c9cec8;--bright:#eef2ec;--muted:#767d77;--accent:#54e08a;
+--crit:#ef5f6b;--high:#e0a35a;--med:#d6c76a;--low:#8b958c}
+*{box-sizing:border-box}
+body{margin:0;padding:32px;background:var(--bg);color:var(--text);
+font:14px/1.5 Consolas,"Cascadia Mono",monospace}
+h1,h2{color:var(--bright);font-weight:700;letter-spacing:.04em}
+h1{font-size:22px;margin:0 0 4px}
+h2{font-size:14px;margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.sub{color:var(--muted);font-size:12px}
+.grid{display:flex;gap:12px;flex-wrap:wrap}
+.card{background:var(--panel);border:1px solid var(--line);padding:14px 16px;flex:1 1 220px}
+.card .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.small{font-size:12px}
+.muted{color:var(--muted)}
+.mono{font-family:Consolas,monospace;word-break:break-all}
+.ring{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;
+background:conic-gradient(__RISK__ 0 __PCT__%, #242824 __PCT__% 100%);flex:0 0 112px}
+.ring>div{width:86px;height:86px;border-radius:50%;background:var(--panel);
+display:grid;place-items:center;color:var(--bright);font-size:26px;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.sev{font-weight:700}.sev.critical{color:var(--crit)}.sev.high{color:var(--high)}
+.sev.medium{color:var(--med)}.sev.low{color:var(--low)}.sev.info{color:var(--muted)}
+.ev{margin:3px 0 0 12px;color:var(--muted);font-size:12px;word-break:break-all}
+.tag{padding:1px 8px;border:1px solid var(--line);font-size:11px}
+.tag.pass{color:var(--accent)}.tag.review{color:var(--high)}.tag.warn{color:var(--crit)}
+.masvs-pass{border-left:2px solid var(--accent)}
+.masvs-review{border-left:2px solid var(--high)}
+.masvs-warn{border-left:2px solid var(--crit)}
+ul{margin:8px 0 0;padding-left:18px}
+li{margin:2px 0}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.links{margin-top:8px;font-size:11px;display:flex;gap:12px}
+details{margin-top:4px}
+summary{cursor:pointer;color:var(--muted)}
+footer{margin-top:30px;color:var(--muted);font-size:11px}
