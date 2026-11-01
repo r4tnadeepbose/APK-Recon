@@ -66,8 +66,12 @@ gets the filter for free.
 ## Scanning pipeline
 
 `ui/scan.py` runs five phases on a worker thread. Before starting, `ask_scan_setup()` (in
-`ui/dialogs.py`) optionally presents the engine chooser with live availability and scan options;
-`scan_text(..., deep=False)` skips the entropy pass for a faster run.
+`ui/dialogs.py`) optionally presents the checkbox-style engine chooser with live availability and
+scan options; `scan_text(..., deep=False)` skips the entropy pass for a faster run.
+
+`scanner.find_jadx()` resolves the jadx CLI from a CONFIG override, PATH, common install folders,
+or a `jadx-gui-*-with-jre-win` bundle (using its bundled JRE and the `jadx.cli.JadxCLI` entry
+point).
 
 1. **ARCHIVE** — zip central directory (`collect_apk_inventory`)
 2. **MANIFEST** — androguard metadata, manifest flags, exported components, signing
@@ -104,6 +108,14 @@ stops when `self.running` becomes false.
 
 Paths are derived from the package location (`config.APP_DIR`), so launching `main.py` from any
 working directory still writes next to the project.
+
+## Theming
+
+`config.py` holds two palettes (`DARK`, `LIGHT`) and `apply_theme(name)`, which mutates the shared
+`PALETTE`/`SEVERITY_COLORS` dicts in place so every module sees the change. `toggle_theme()` in
+`ui/app.py` applies the palette, persists it, destroys and rebuilds the widget tree, then re-renders
+the current scan — analysis state, history, diff and filter survive; only the visual layer is
+recreated. Reports keep their dark styling.
 
 ## History and performance
 
