@@ -306,7 +306,7 @@ class TextViewsMixin:
     def copy_current(self):
         if self.active_tab == "dashboard":
             summary = (
-                f"APKRecon · {os.path.basename(self.current_apk_path or '')}\n"
+                f"APK-Recon · {os.path.basename(self.current_apk_path or '')}\n"
                 f"risk {self.risk_score}/100 ({self.risk_grade}) · "
                 f"{len(self.findings)} findings\n"
                 + "\n".join(f"[{f['severity']}] {f['title']} — {f.get('detail', '')}"

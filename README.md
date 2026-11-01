@@ -1,18 +1,24 @@
-# APKRecon
+# APK-Recon
 
 **Offline, god-tier APK recon.** Point it at an Android package and get endpoints, deep links,
 hardcoded secrets, SDKs, APK inventory, signing posture, a MASVS report, and an evidence-backed
 risk score — all in a neutral, terminal-flavoured desktop UI. Everything runs locally; nothing
 leaves the machine.
 
-![APKRecon dashboard](docs/screenshots/dashboard.png)
+![APK-Recon dashboard](docs/screenshots/dashboard.png)
 
 ---
 
 ## Highlights
 
+- **Scan setup chooser** — before each scan pick the extraction engine (auto / dex-only / jadx /
+  apktool) with live availability detection, fast mode, cache reuse, deep strings and workers.
+- **Adaptive, fast UI** — filter input is debounced, entropy can be switched off for speed, and
+  every view re-renders from cached scan data.
 - **Live scan pipeline** — ARCHIVE → MANIFEST → EXTRACT → SCAN → RISK, with spinner, percentage,
   ETA and a streaming activity log.
+- **Scan history** — every run is recorded locally (engine, duration, counts, risk, grade) in a
+  dedicated history view, so you can compare sessions over time.
 - **Risk engine** — severity-rated findings (CRITICAL → INFO) with **evidence samples** (actual
   values, URLs, component names, cert details).
 - **MASVS report** — all eight OWASP MASVS categories scored PASS / REVIEW / WARN from static
@@ -32,26 +38,110 @@ leaves the machine.
 
 ---
 
-## Quick start
+## Download & install
+
+APK-Recon is a self-contained Python/Tk application: no server, no build step, and **no required
+pip packages**. Choose your platform below.
+
+### 1. Get the files
+
+If you received a `.zip`, extract it. Otherwise clone the repository:
 
 ```bash
-python main.py
+git clone https://github.com/r4tnadeepbose/APKRecon.git APK-Recon
+cd APK-Recon
 ```
 
-`main.py` is the entry point — double-click it from Explorer or run it from any directory. There
-are no required third-party packages (`requirements.txt` lists the optional extras).
+No Git installed? Use GitHub's **Code → Download ZIP** and extract it, or copy the folder you
+already have. Keep the layout intact — `main.py` must sit next to the `apkrecon/` package:
 
-Requirements:
+```
+APK-Recon/
+├─ main.py
+├─ apkrecon/
+├─ docs/
+└─ requirements.txt
+```
 
-| Component | Needed for | Notes |
-| --- | --- | --- |
-| Python 3.10+ with Tk | the app itself | `tkinter` ships with the official Windows installer |
-| [androguard](https://github.com/androguard/androguard) | fast DEX engine, manifest & signing analysis | `pip install androguard` |
-| [jadx](https://github.com/skylot/jadx) | source decompilation engine | optional |
-| [apktool](https://apktool.org/) | smali / resource decompilation engine | optional |
+To update a cloned copy later: `cd APK-Recon && git pull`.
 
-Without androguard the tool still runs the zip inventory, endpoint/secret extraction and
-reports from decompiled output; APK metadata and signing data will simply be empty.
+### 2. Windows 10 / 11
+
+1. **Install Python 3.10+** from [python.org](https://www.python.org/downloads/) and tick
+   **"Add python.exe to PATH"**. Tkinter is included with the official installer. Verify:
+   ```powershell
+   py -3 --version
+   ```
+2. **Optional, recommended — androguard** (fast DEX engine, manifest and signing analysis):
+   ```powershell
+   py -3 -m pip install --upgrade androguard
+   ```
+3. **Optional decompilers** — APK-Recon auto-detects these locations, or set custom paths in
+   **CONFIG**:
+   - **jadx** — extract a release so `C:\jadx\bin\jadx.bat` exists.
+   - **apktool** — place `apktool.jar` and `apktool.bat` in `C:\apktool`.
+4. **Run** — double-click `main.py` in Explorer, or from a terminal:
+   ```powershell
+   cd C:\path\to\APK-Recon
+   py -3 main.py
+   ```
+
+> If `python` is not on PATH, the `py -3` launcher above still works. The app is fully local — it
+> opens no network sockets, so no firewall rules are needed.
+
+### 3. Kali Linux
+
+1. **Base packages** (Python 3 + Tk + Java for the decompilers):
+   ```bash
+   sudo apt update
+   sudo apt install -y python3 python3-tk python3-venv openjdk-17-jre-headless
+   ```
+2. **Optional decompilers** — installs from the Kali repositories when available:
+   ```bash
+   sudo apt install -y jadx apktool
+   ```
+   If a package is missing in your release, download the upstream jadx release (extract to
+   `/opt/jadx`) or the apktool wrapper, then set the path in **CONFIG**.
+3. **Get the app and install androguard in a venv** (recommended):
+   ```bash
+   mkdir -p ~/tools && cd ~/tools
+   git clone https://github.com/r4tnadeepbose/APKRecon.git APK-Recon
+   cd APK-Recon
+   python3 -m venv .venv
+   source .venv/bin/activate
+   python -m pip install --upgrade pip
+   python -m pip install --upgrade androguard
+   ```
+   Prefer not to use a venv? Kali marks Python as externally managed:
+   ```bash
+   python3 -m pip install --user androguard
+   ```
+   Only use `--break-system-packages` if you understand your distribution's policy.
+4. **Run** as your desktop user — **not** with `sudo`, so Tk can open a window:
+   ```bash
+   chmod +x main.py
+   ./main.py
+   # or
+   python3 main.py
+   ```
+   Works on Kali's XFCE desktop (X11/Wayland + XWayland). A headless SSH session needs an X server
+   or VNC; plain TTY cannot show the GUI.
+
+### Requirements at a glance
+
+| Component | Needed for | Windows | Kali |
+| --- | --- | --- | --- |
+| Python 3.10+ with Tk | the app itself | python.org installer (Tk included) | `python3 python3-tk` |
+| [androguard](https://github.com/androguard/androguard) | fast DEX engine, manifest & signing | `py -3 -m pip install androguard` | `pip install androguard` in a venv |
+| [jadx](https://github.com/skylot/jadx) | Java/Kotlin decompilation | release zip → `C:\jadx` | `apt install jadx` |
+| [apktool](https://apktool.org/) | smali / resource decompilation | `C:\apktool` | `apt install apktool` |
+
+Without androguard the tool still runs the zip inventory, endpoint/secret extraction and reports
+from decompiled output; APK metadata and signing data will simply be empty.
+
+> On both platforms, `main.py` is the entry point. Settings (`apk_recon_settings.json`), history
+> (`apk_recon_history.json`), reports (`reports/`) and the decompile cache (`decompiled_apk_temp/`)
+> are written next to it. Nothing is uploaded; the app makes no network calls.
 
 ---
 
@@ -59,9 +149,12 @@ reports from decompiled output; APK metadata and signing data will simply be emp
 
 1. **BROWSE** is highlighted red. Pick an `.apk`.
 2. Browse returns to normal and **ANALYZE** turns red. Click it.
-3. While scanning, ANALYZE switches to a pale red **ANALYZING…** state and the dashboard shows
+3. **SCAN SETUP** opens: choose the engine (auto / dex-only / jadx / apktool — unavailable engines
+   are marked), toggle fast mode, cache reuse and deep strings, set workers, then **START SCAN**.
+   Uncheck "Don't show this again" if you prefer the direct path next time.
+4. While scanning, ANALYZE switches to a pale red **ANALYZING…** state and the dashboard shows
    the pipeline live. **CANCEL** stops the run.
-4. Review findings, then export or let the HTML report open automatically.
+5. Review findings, then export or let the HTML report open automatically.
 
 ![Empty state](docs/screenshots/initial.png)
 
@@ -76,10 +169,14 @@ reports from decompiled output; APK metadata and signing data will simply be emp
 
 The landing view. Charts are drawn directly on a Tk canvas — no plotting dependency.
 
+- **Target strip** — APK name, package, version, SDK range, signature state, engine, size and
+  file/DEX/library counts as compact chips.
 - **Risk gauge** — score 0–100 with letter grade; the arc colour is green ≥ 75, amber ≥ 50, red
   below that.
-- **Severity donut** — finding counts per severity, generated from the risk engine.
-- **Top hosts / secret categories** — quickest way to see where the app talks and what leaked.
+- **Severity donut** — finding counts per severity, plus a row of MASVS status chips (ST CR AU NE
+  PL CO RE PR) colour-coded PASS/REVIEW/WARN.
+- **Top hosts / secret categories / top findings** — three live panels; the layout collapses to
+  two columns on narrower windows.
 - **Pipeline strip** — per-phase status with a rotating indicator on the active phase, progress
   fraction, counts and ETA (elapsed time extrapolated from work completed).
 - Clicking any KPI card jumps to the matching view.
@@ -103,6 +200,13 @@ details. Double-click any line to copy it.
 
 Timestamped session log: target load, inventory, manifest, engine choice, streamed jadx/apktool
 output, scan failures, report generation. Capped at 1,500 lines so long sessions stay responsive.
+
+#### Scan history
+![Scan history](docs/screenshots/history.png)
+
+Every completed scan is recorded locally in `apk_recon_history.json`: timestamp, APK, package,
+version, engine, duration, file/URL/secret counts, risk and grade (plus the report path when one
+was generated). Newest first; cleared from CONFIG. The view is searchable like any other.
 
 ---
 
@@ -263,6 +367,13 @@ detected jadx/apktool paths, current engine and worker defaults, plus install li
 
 ### Dialogs
 
+#### Scan setup (after Analyze)
+![Scan setup](docs/screenshots/setup.png)
+
+Shown before every scan unless disabled. Each engine lists its description and live availability
+(androguard version, jadx/apktool detection, custom paths from CONFIG). The selected setup is
+applied to the run and persisted; "Don't show this again" can be reversed in CONFIG.
+
 #### How to use (`?` / `F1`)
 ![How to use](docs/screenshots/help.png)
 
@@ -279,7 +390,7 @@ Optional jadx/apktool path overrides, engine, workers, fast mode, cache reuse an
 
 ### HTML report
 
-After each successful scan — when *Auto HTML* is enabled — APKRecon writes
+After each successful scan — when *Auto HTML* is enabled — APK-Recon writes
 `reports/<apk>-<timestamp>.html` and opens it in your default browser. The `HTML` button and
 `Ctrl+H` regenerate it on demand.
 
@@ -292,6 +403,17 @@ SDKs, inventory and metadata. Use it as the engagement artefact.
 ---
 
 ## Techniques under the hood
+
+### Scan setup and deep strings
+Before a scan, `ask_scan_setup()` detects available engines (`androguard` version, jadx/apktool
+paths including CONFIG overrides), recommends one, and applies fast mode, cache reuse, entropy
+("deep strings") and worker count. The result is persisted in `apk_recon_settings.json`.
+`scan_text(..., deep=False)` skips the entropy pass for a faster scan, which matters on large DEX
+blobs.
+
+### Scan history
+`_record_history()` stores one compact record per successful scan in `apk_recon_history.json`
+(capped at 100 entries) and refreshes the History view; `Clear scan history` lives in CONFIG.
 
 ### Scan pipeline
 `_worker()` runs five phases and updates the dashboard through a thread-safe `after()` bridge:
@@ -449,7 +571,7 @@ apkrecon/
     render.py                  ScanResult → per-view item lists
     dashboard.py               canvas charts + pipeline + phases
     textviews.py               text insertion, filtering, reference pages
-    dialogs.py                 configuration + how-to dialogs
+    dialogs.py                 configuration, scan setup + how-to dialogs
     reports.py                 JSON / CSV / TXT / Markdown / HTML export
 requirements.txt               optional dependencies (none required)
 docs/ARCHITECTURE.md           module map, data flow, extension points
@@ -457,6 +579,7 @@ docs/screenshots/              screenshots used in this README
 reports/                       generated HTML reports (created on demand)
 decompiled_apk_temp/           cached decompilation output
 apk_recon_settings.json        persisted preferences (created on first save)
+apk_recon_history.json         local scan history (created after the first scan)
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the layering, threading model and how to add
@@ -470,5 +593,5 @@ new detectors, views, charts or exports.
 - Secrets are regex/heuristic leads — **verify before reporting or using them**.
 - Entropy candidates are noisy by nature; treat them as leads.
 - APK metadata, signing and manifest flags require `androguard`.
-- Use APKRecon only on applications you own or are authorised to assess. It makes no network calls
+- Use APK-Recon only on applications you own or are authorised to assess. It makes no network calls
   and uploads nothing.

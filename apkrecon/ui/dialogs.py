@@ -30,7 +30,7 @@ class DialogsMixin:
 
         win = tk.Toplevel(self.root)
         self._settings_win = win
-        win.title("APKRecon · configuration")
+        win.title("APK-Recon · configuration")
         win.configure(bg=PALETTE["bg"])
         win.geometry("780x520")
         win.transient(self.root)
@@ -165,7 +165,7 @@ class DialogsMixin:
             current = "auto"
 
         win = tk.Toplevel(self.root)
-        win.title("APKRecon · scan setup")
+        win.title("APK-Recon · scan setup")
         win.configure(bg=PALETTE["bg"])
         win.geometry("760x600")
         win.transient(self.root)
@@ -294,7 +294,7 @@ class DialogsMixin:
 
         win = tk.Toplevel(self.root)
         self._help_win = win
-        win.title("APKRecon · how to use")
+        win.title("APK-Recon · how to use")
         win.configure(bg=PALETTE["bg"])
         win.geometry("780x640")
         win.transient(self.root)
@@ -308,7 +308,7 @@ class DialogsMixin:
         inner = tk.Frame(panel, bg=PALETTE["surface"])
         inner.pack(fill="both", expand=True, padx=20, pady=16)
 
-        tk.Label(inner, text="HOW TO USE APKRECON", bg=PALETTE["surface"],
+        tk.Label(inner, text="HOW TO USE APK-RECON", bg=PALETTE["surface"],
                  fg=PALETTE["text_bright"], font=self.f_bold_md).pack(anchor="w")
         tk.Label(inner, text="a 30-second orientation · everything runs locally",
                  bg=PALETTE["surface"], fg=PALETTE["muted"],

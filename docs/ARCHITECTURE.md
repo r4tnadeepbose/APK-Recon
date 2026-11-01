@@ -1,6 +1,6 @@
 # Architecture
 
-APKRecon is a small layered desktop app. `main.py` is only a launcher; everything else lives in
+APK-Recon is a small layered desktop app. `main.py` is only a launcher; everything else lives in
 the `apkrecon` package.
 
 ```
@@ -22,7 +22,7 @@ main.py                     launcher (Tk root + APKReconGUI)
         ├── render.py       ScanResult → raw item lists for every view
         ├── dashboard.py    canvas charts + scan pipeline + phases
         ├── textviews.py    text insertion/filter/copy + reference pages
-        ├── dialogs.py      configuration + how-to dialogs
+        ├── dialogs.py      configuration, scan setup + how-to dialogs
         └── reports.py      JSON / CSV / TXT / Markdown / HTML export
 ```
 
@@ -65,7 +65,9 @@ gets the filter for free.
 
 ## Scanning pipeline
 
-`ui/scan.py` runs five phases on a worker thread:
+`ui/scan.py` runs five phases on a worker thread. Before starting, `ask_scan_setup()` (in
+`ui/dialogs.py`) optionally presents the engine chooser with live availability and scan options;
+`scan_text(..., deep=False)` skips the entropy pass for a faster run.
 
 1. **ARCHIVE** — zip central directory (`collect_apk_inventory`)
 2. **MANIFEST** — androguard metadata, manifest flags, exported components, signing
@@ -97,10 +99,19 @@ stops when `self.running` becomes false.
 | --- | --- | --- |
 | `apk_recon_settings.json` | first save/close | engine, workers, tool paths, auto HTML, last directory |
 | `decompiled_apk_temp/` | first decompiled scan | jadx/apktool output + engine marker |
+| `apk_recon_history.json` | after the first successful scan | last 100 scans: time, apk, engine, duration, counts, risk, report path |
 | `reports/` | first HTML report | timestamped `<apk>-YYYYMMDD-HHMMSS.html` |
 
 Paths are derived from the package location (`config.APP_DIR`), so launching `main.py` from any
 working directory still writes next to the project.
+
+## History and performance
+
+- `_record_history()` (in `ui/app.py`) appends a compact session record after each successful
+  scan and refreshes the History view; the file is capped at 100 entries.
+- Filter changes are debounced (120 ms) through `_schedule_filter`; clearing the filter applies
+  immediately.
+- `render` keeps each view's raw items so filtering and omni-search never re-scan the APK.
 
 ## Manual test checklist
 

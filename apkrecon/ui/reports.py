@@ -142,7 +142,7 @@ class ReportsMixin:
         r = self.result
         lines = []
         apk_name = os.path.basename(self.current_apk_path or "unknown.apk")
-        lines.append(f"# APKRecon report — {apk_name}")
+        lines.append(f"# APK-Recon report — {apk_name}")
         lines.append("")
         lines.append(f"- Generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}")
         lines.append(f"- Risk score: **{self.risk_score}/100** (grade {self.risk_grade})")
@@ -305,7 +305,7 @@ class ReportsMixin:
         )
         apk_name = esc(os.path.basename(self.current_apk_path or "unknown.apk"))
         body = f"""
-<h1>APKRECON · {apk_name}</h1>
+<h1>APK-RECON · {apk_name}</h1>
 <div class="sub">generated {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')} ·
 local static analysis · risk grade {esc(self.risk_grade)}</div>
 
@@ -359,11 +359,11 @@ local static analysis · risk grade {esc(self.risk_grade)}</div>
 <h2>Metadata</h2>
 <table><tbody>{meta_rows}</tbody></table>
 
-<footer>APKRecon · offline recon report · verify every secret manually before use</footer>
+<footer>APK-Recon · offline recon report · verify every secret manually before use</footer>
 """
         return (
             load_template("report.html")
-            .replace("__TITLE__", f"APKRecon · {apk_name}")
+            .replace("__TITLE__", f"APK-Recon · {apk_name}")
             .replace("__CSS__", css)
             .replace("__BODY__", body)
         )

@@ -90,7 +90,7 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
 
     def __init__(self, root):
         self.root = root
-        self.root.title("APKRecon")
+        self.root.title("APK-Recon")
         self.root.geometry("1320x860")
         self.root.minsize(1080, 680)
         try:
@@ -383,7 +383,7 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
         title_box = tk.Frame(header, bg=PALETTE["bg"])
         title_box.pack(side="left", padx=(12, 0))
         tk.Label(
-            title_box, text="APKRECON", bg=PALETTE["bg"], fg=PALETTE["text_bright"],
+            title_box, text="APK-RECON", bg=PALETTE["bg"], fg=PALETTE["text_bright"],
             font=self.f_title,
         ).pack(anchor="w")
         tk.Label(
@@ -864,7 +864,7 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
             self.last_dir = os.path.dirname(p)
             self.path_var.set(p)
             self.current_apk_path = p
-            self.root.title(f"APKRecon — {os.path.basename(p)}")
+            self.root.title(f"APK-Recon — {os.path.basename(p)}")
             self._sync_buttons()
             self._log(f"target loaded: {os.path.basename(p)}", "muted")
             self._status(f"Target loaded: {os.path.basename(p)}")
@@ -876,7 +876,7 @@ class APKReconGUI(ThemeMixin, DashboardMixin, TextViewsMixin,
             messagebox.showinfo("Nothing to compare", "Run a scan first.")
             return
         path = filedialog.askopenfilename(
-            title="Select a previous APKRecon JSON export",
+            title="Select a previous APK-Recon JSON export",
             initialdir=self.last_dir or os.getcwd(),
             filetypes=[("JSON", "*.json")],
         )

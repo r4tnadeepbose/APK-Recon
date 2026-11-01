@@ -1,4 +1,4 @@
-# APKRecon has no required third-party dependencies (Python 3.10+ with Tk).
+# APK-Recon has no required third-party dependencies (Python 3.10+ with Tk).
 #
 # Optional integrations for deeper analysis:
 #   pip install androguard

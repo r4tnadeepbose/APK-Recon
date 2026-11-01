@@ -1,3 +1,3 @@
-"""APKRecon — offline APK reconnaissance toolkit."""
+"""APK-Recon — offline APK reconnaissance toolkit."""
 
 __version__ = "1.0.0"

@@ -5,7 +5,7 @@ __pycache__/
 .venv/
 venv/
 
-# APKRecon runtime artefacts
+# APK-Recon runtime artefacts
 apk_recon_settings.json
 apk_recon_history.json
 decompiled_apk_temp/
