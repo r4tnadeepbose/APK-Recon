@@ -7,8 +7,6 @@ evidence-backed findings and a report you can hand over.
 
 Everything runs on your machine. No uploads, no telemetry, no network access.
 
-![APK-Recon dashboard](docs/screenshots/dashboard.png)
-
 ---
 
 ## What it does
@@ -70,177 +68,16 @@ regression checks — not for inspecting apps you do not have permission to asse
 
 ---
 
-## Screenshot tour
+## Screenshots
 
-All screenshots below are from a synthetic `zepto-demo-3.1.0.apk` dataset, so the views are fully
-populated. The UI is real; the findings are demo data.
+These four views show the core workflow without duplicating every navigation tab. They are captured
+from the real desktop UI and the generated report using the synthetic demo dataset.
 
-### First run
-
-1. **BROWSE** is red until a package is loaded.
-2. **ANALYZE** turns red once a target is selected.
-3. **SCAN SETUP** opens so you can choose the extraction engine and options.
-4. The dashboard shows the scan pipeline live; ANALYZE becomes a pale red **ANALYZING…** switch.
-5. Find, review, export.
-
-![Empty state](docs/screenshots/initial.png)
-
-### Dashboard and themes
-
-The dashboard is shown at the top of this page. It combines a target strip, the five-phase scan
-pipeline, a risk gauge, a severity donut with MASVS chips, top hosts, secret categories and top
-findings. Use **LIGHT / DARK** in the header (or `Ctrl+T`) to switch themes; the choice is
-remembered.
-
-![Light mode](docs/screenshots/light.png)
-
-### Session views
-
-**Scan history** keeps one compact record per completed scan — engine, duration, counts, risk and
-grade — so you can compare sessions over time.
-
-![Scan history](docs/screenshots/history.png)
-
-**Activity log** streams inventory, manifest, engine selection, decompiler output and report events
-with timestamps.
-
-![Activity log](docs/screenshots/log.png)
-
-### Findings and risk
-
-**Findings** lists every CRITICAL → INFO result with an explanation and indented evidence samples
-(`↳` actual value, URL, component, permission, certificate, file). The risk score and grade are
-computed from the weighted findings.
+![Dashboard](docs/screenshots/dashboard.png)
 
 ![Findings](docs/screenshots/findings.png)
 
-**Overview** is a flat text summary of the session — risk, counts, hosts, secrets, SDKs, entropy.
-
-![Overview](docs/screenshots/stats.png)
-
-### MASVS report
-
-All eight OWASP MASVS categories (STORAGE, CRYPTO, AUTH, NETWORK, PLATFORM, CODE, RESILIENCE,
-PRIVACY) are marked PASS / REVIEW / WARN from static evidence, with clickable MASVS/MASTG links.
-
-![MASVS report](docs/screenshots/masvs.png)
-
-### Discovery
-
-**Links / URLs** — every matched endpoint; secure schemes green, cleartext HTTP amber.
-
-![Links and URLs](docs/screenshots/urls.png)
-
-**Hosts** — URL hygiene, path prefixes, deep-link schemes, query parameters and per-host paths.
-
-![Hosts](docs/screenshots/hosts.png)
-
-**Domains** — domain-shaped strings from URLs, DEX string tables and resources.
-
-![Domains](docs/screenshots/domains.png)
-
-**IP addresses** — IPv4/IPv6 literals, often staging or internal infrastructure leaks.
-
-![IP addresses](docs/screenshots/ips.png)
-
-**Emails** — embedded addresses and developer/test contact leaks.
-
-![Emails](docs/screenshots/emails.png)
-
-**File types** — extension frequency across scanned content.
-
-![File types](docs/screenshots/exts.png)
-
-**Secrets / keys** — the full regex catalog grouped by category, with source files.
-
-![Secrets](docs/screenshots/secrets.png)
-
-**Entropy** — Shannon-entropy candidates that the regex catalog cannot catch, labelled as leads to
-verify.
-
-![Entropy](docs/screenshots/entropy.png)
-
-**Deep links** — custom schemes, intents, payment URIs and app links.
-
-![Deep links](docs/screenshots/deeplink.png)
-
-**Search** — the filter box searches every view at once (`[urls]`, `[secrets]`, `[hosts]` tags),
-with a regex toggle.
-
-![Search](docs/screenshots/search.png)
-
-### Package
-
-**Metadata** — identity, SDK levels, SHA-256, manifest flags and signing details.
-
-![Metadata](docs/screenshots/metadata.png)
-
-**Permissions** — sorted by risk, with colour-coded severity and plain descriptions.
-
-![Permissions](docs/screenshots/permissions.png)
-
-**Components** — activities/services/receivers/providers with EXPORTED markers and permissions.
-
-![Components](docs/screenshots/components.png)
-
-**Inventory** — APK size, ZIP entries, DEX, native ABIs, assets, resources, signature files and
-largest entries (works without androguard).
-
-![Inventory](docs/screenshots/inventory.png)
-
-**SDKs / trackers** — fingerprints for Firebase, Crashlytics, Facebook, AppsFlyer, Sentry, Unity,
-Flutter, Stripe, OkHttp and more.
-
-![SDKs](docs/screenshots/sdks.png)
-
-**Signals** — weak crypto markers and platform hardening signals (pinning, root detection,
-attestation, WebView bridges, dynamic loading, reflection).
-
-![Signals](docs/screenshots/signals.png)
-
-### Reports and references
-
-**Security checklist** — PASS/REVIEW on secrets, cleartext, coverage, target SDK, permissions,
-debug flag, backup, exported components and signing.
-
-![Security checklist](docs/screenshots/checklist.png)
-
-**Baseline diff** — compare a new build against an earlier JSON export: additions in green,
-removals in red, plus metadata changes.
-
-![Baseline diff](docs/screenshots/diff.png)
-
-**Cheat sheet** — clickable OWASP/Android references, copy-ready commands (jadx, apktool,
-apksigner, aapt, keytool, adb), secret-hunting patterns and the severity model.
-
-![Cheat sheet](docs/screenshots/cheatsheet.png)
-
-**Environment** — runtime versions, paths, androguard/jadx/apktool detection and install links.
-
-![Environment](docs/screenshots/environment.png)
-
-### Dialogs
-
-**Scan setup** — checkbox engine chooser with live availability (androguard version, jadx including
-`jadx-gui-*-with-jre-win` bundles, apktool), fast mode, cache reuse, deep strings and workers.
-
 ![Scan setup](docs/screenshots/setup.png)
-
-**How to use** — a 30-second orientation with the workflow, button states and shortcut grid.
-
-![How to use](docs/screenshots/help.png)
-
-**Configuration** — tool path overrides, engine/worker defaults, Auto HTML, deep scan, history
-controls.
-
-![Configuration](docs/screenshots/settings.png)
-
-### HTML report
-
-After a successful scan, APK-Recon writes `reports/<apk>-<timestamp>.html` and opens it in your
-browser (toggle **Auto HTML**, or press `Ctrl+H`). The report is a single self-contained file with
-risk ring, findings and evidence, MASVS cards, secrets, endpoints, hosts, permissions, SDKs,
-inventory and metadata.
 
 ![HTML report](docs/screenshots/html-report.png)
 
